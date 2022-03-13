@@ -105,7 +105,6 @@ class GLOBALS(object):
     COTS_UE_HWTYPE = "nexus5"
     UBUNTU_1804_IMG = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU18-64-STD"
     SRSLTE_IMG = "urn:publicid:IDN+emulab.net+image+PowderProfiles:U18LL-SRSLTE:1"
-
     COTS_UE_IMG = URN.Image(PN.PNDEFS.PNET_AM, "PhantomNet:ANDROID444-STD")
     ADB_IMG = URN.Image(PN.PNDEFS.PNET_AM, "PhantomNet:UBUNTU14-64-PNTOOLS")
 
@@ -122,6 +121,10 @@ pc.defineParameter("enb_node", "eNodeB Node ID",
 pc.defineParameter("ue_node", "UE Node ID",
                    portal.ParameterType.STRING, "", advanced=True,
                    longDescription="Specific UE node to bind to.")
+
+pc.defineParameter("num_ues", "Number of NUC+B210 srsLTE UEs to allocate",
+                   portal.ParameterType.INTEGER, 1, [1,2])
+
 
 pc.defineParameter(
     "multiplexLans", "Multiplex Networks",
@@ -156,7 +159,7 @@ if params.sharedVlanAddress:
             ['sharedVlanAddress'])
         pc.reportError(perr)
     else:
-        (sharedVlanAddress,sharedVlanNetmask) = (aa[0],aa[1])
+        (sharedVlanAddress,sharedVlanNetmask) = (aa[0], aa[1])
 
 pc.verifyParameters()
 request = pc.makeRequestRSpec()
@@ -168,17 +171,16 @@ enb1.hardware_type = GLOBALS.NUC_HWTYPE
 enb1.disk_image = GLOBALS.SRSLTE_IMG
 enb1.Desire("rf-controlled", 1)
 enb1_rue1_rf = enb1.addInterface("rue1_rf")
-# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/update-config-files.sh"))
-# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/add-nat-and-ip-forwarding.sh"))
-#
-# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-ip-config.sh %s" % params.oranAddress))
-# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-srslte.sh"))
-
-enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-ip-config.sh %s" % params.oranAddress))
 enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/update-config-files.sh"))
+enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/add-nat-and-ip-forwarding.sh"))
+enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-ip-config.sh %s" % params.oranAddress))
 enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-srslte.sh"))
+
+# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-ip-config.sh %s" % params.oranAddress))
+# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/update-config-files.sh"))
+# enb1.addService(rspec.Execute(shell="bash", command="/local/repository/bin/setup-srslte.sh"))
 
 # Add a UE node
 """if params.ue_type == "nexus5":
